@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,8 +35,7 @@ public class LocationProvider {
     /**
      * The fastest rate for active location updates. Exact. Updates will never be more frequent than this value.
      */
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     /**
      * Provides access to the Fused Location Provider API.
@@ -46,6 +46,11 @@ public class LocationProvider {
      * Provides access to the Location Settings API.
      */
     private static SettingsClient settingsClient;
+
+    /**
+     * Stores parameters for requests to the FusedLocationProviderApi.
+     */
+    private static LocationRequest locationRequest;
 
     /**
      * Create a new instance of {@link FusedLocationProviderClient} for use in a non-activity {@link Context}
@@ -73,6 +78,29 @@ public class LocationProvider {
             settingsClient = LocationServices.getSettingsClient(context);
         }
         return settingsClient;
+    }
+
+    /**
+     * Create a new instance of {@link LocationRequest}
+     * <p>
+     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
+     * interval (5 seconds), the Fused Location Provider API returns location updates that are
+     * accurate to within a few feet.
+     * <p/>
+     * These settings are appropriate for mapping applications that show real-time location
+     * updates.
+     *
+     * @return
+     * @since 0.1.0
+     */
+    public static synchronized LocationRequest createLocationRequest() {
+        if (locationRequest == null) {
+            locationRequest = new LocationRequest();
+            locationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+            locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        }
+        return locationRequest;
     }
 
     /**
