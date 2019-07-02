@@ -46,6 +46,7 @@ public class LocationProvider {
      *
      * @param context
      * @return
+     * @since 0.1.0
      */
     public static synchronized FusedLocationProviderClient createLocationClient(@NonNull Context context) {
         if (fusedLocationClient == null) {
@@ -56,6 +57,8 @@ public class LocationProvider {
 
     /**
      * Clear and reset internal states
+     *
+     * @since 0.1.0
      */
     public static synchronized void clear() {
         fusedLocationClient = null;
@@ -66,6 +69,7 @@ public class LocationProvider {
      *
      * @param context
      * @param listener
+     * @since 0.1.0
      */
     @RequiresPermission(
             anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
@@ -95,8 +99,30 @@ public class LocationProvider {
         });
     }
 
+    /**
+     * Request location updates
+     *
+     * @param context
+     * @param listener
+     * @since 0.1.0
+     */
+    @RequiresPermission(
+            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+    )
+    public static synchronized void requestLocationUpdates(
+            @NonNull Context context,
+            @NonNull OnLastLocationListener listener) {
+
+    }
+
 
     public interface OnLastLocationListener {
+        void onSuccess(Location location);
+
+        void onFailure(Exception error);
+    }
+
+    public interface OnLocationUpdatesListener {
         void onSuccess(Location location);
 
         void onFailure(Exception error);
