@@ -5,9 +5,12 @@ import android.content.Context;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 /**
  * A pack of helpful helpers to obtain location(s) from fused {@link com.google.android.gms.location.FusedLocationProviderClient}.
@@ -64,10 +67,32 @@ public class LocationProvider {
      * @param context
      * @param listener
      */
+    @RequiresPermission(
+            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+    )
     public static synchronized void requestLastLocation(
             @NonNull Context context,
             @NonNull OnLastLocationListener listener) {
+        // obtain fused location client
+        FusedLocationProviderClient fusedLocationClient = createLocationClient(context);
 
+        // request last known location
+        Task<Location> lastLocation = fusedLocationClient.getLastLocation();
+        lastLocation.addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+                // grab last known location
+                Location lastLocation = task.getResult();
+                // reply ok if found
+                if (task.isSuccessful() && lastLocation != null) {
+                    listener.onSuccess(lastLocation);
+                }
+                // notify error otherwise
+                else {
+                    listener.onFailure(task.getException());
+                }
+            }
+        });
     }
 
 
