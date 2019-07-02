@@ -52,6 +52,13 @@ public class LocationProvider {
     }
 
     /**
+     * Clear and reset internal states
+     */
+    public static synchronized void clear() {
+        fusedLocationClient = null;
+    }
+
+    /**
      * Get the last known location
      *
      * @param context
