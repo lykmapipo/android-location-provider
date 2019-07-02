@@ -10,6 +10,7 @@ import androidx.annotation.RequiresPermission;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,7 +26,7 @@ public class LocationProvider {
     /**
      * Constant used in the location settings dialog.
      */
-    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private static final int REQUEST_CHECK_LOCATION_SETTINGS = 0x1;
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -51,6 +52,12 @@ public class LocationProvider {
      * Stores parameters for requests to the FusedLocationProviderApi.
      */
     private static LocationRequest locationRequest;
+
+    /**
+     * Stores the types of location services the client is interested in using. Used for checking
+     * settings to determine if the device has optimal location settings.
+     */
+    private static LocationSettingsRequest locationSettingsRequest;
 
     /**
      * Create a new instance of {@link FusedLocationProviderClient} for use in a non-activity {@link Context}
@@ -101,6 +108,23 @@ public class LocationProvider {
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         }
         return locationRequest;
+    }
+
+    /**
+     * Uses a {@link com.google.android.gms.location.LocationSettingsRequest.Builder} to build
+     * a {@link com.google.android.gms.location.LocationSettingsRequest} that is used for checking
+     * if a device has the needed location settings.
+     *
+     * @since 0.1.0
+     */
+    public static synchronized LocationSettingsRequest createLocationSettingsRequest() {
+        if (locationSettingsRequest == null) {
+            LocationRequest locationRequest = createLocationRequest();
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+            builder.addLocationRequest(locationRequest);
+            locationSettingsRequest = builder.build();
+        }
+        return locationSettingsRequest;
     }
 
     /**
@@ -160,6 +184,7 @@ public class LocationProvider {
      * @since 0.1.0
      */
     public static synchronized void clear() {
+        locationSettingsRequest = null;
         locationRequest = null;
         settingsClient = null;
         fusedLocationClient = null;

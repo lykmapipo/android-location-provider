@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 
 import org.junit.After;
@@ -43,6 +44,12 @@ public class LocationProviderTest {
     public void testShouldCreateLocationRequest() {
         LocationRequest request = LocationProvider.createLocationRequest();
         assertNotNull("Should create location request", request);
+    }
+
+    @Test
+    public void testShouldCreateLocationSettingRequest() {
+        LocationSettingsRequest request = LocationProvider.createLocationSettingsRequest();
+        assertNotNull("Should create location settings request", request);
     }
 
     @Test
