@@ -9,6 +9,7 @@ import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -42,6 +43,11 @@ public class LocationProvider {
     private static FusedLocationProviderClient fusedLocationClient;
 
     /**
+     * Provides access to the Location Settings API.
+     */
+    private static SettingsClient settingsClient;
+
+    /**
      * Create a new instance of {@link FusedLocationProviderClient} for use in a non-activity {@link Context}
      *
      * @param context
@@ -56,11 +62,26 @@ public class LocationProvider {
     }
 
     /**
+     * Create a new instance of {@link SettingsClient} for use in a non-activity {@link Context}
+     *
+     * @param context
+     * @return
+     * @since 0.1.0
+     */
+    public static synchronized SettingsClient createSettingsClient(@NonNull Context context) {
+        if (settingsClient == null) {
+            settingsClient = LocationServices.getSettingsClient(context);
+        }
+        return settingsClient;
+    }
+
+    /**
      * Clear and reset internal states
      *
      * @since 0.1.0
      */
     public static synchronized void clear() {
+        settingsClient = null;
         fusedLocationClient = null;
     }
 

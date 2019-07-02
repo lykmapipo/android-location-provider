@@ -6,6 +6,7 @@ import android.location.Location;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.SettingsClient;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +30,12 @@ public class LocationProviderTest {
     public void testShouldCreateLocationClient() {
         FusedLocationProviderClient client = LocationProvider.createLocationClient(context);
         assertNotNull("Should create location client", client);
+    }
+
+    @Test
+    public void testShouldCreateSettingsClient() {
+        SettingsClient client = LocationProvider.createSettingsClient(context);
+        assertNotNull("Should create settings client", client);
     }
 
     @Test
