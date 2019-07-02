@@ -10,7 +10,9 @@ import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -63,6 +65,11 @@ public class LocationProvider {
      * settings to determine if the device has optimal location settings.
      */
     private static LocationSettingsRequest locationSettingsRequest;
+
+    /**
+     * Callback for Location events.
+     */
+    private static LocationCallback locationCallback;
 
     /**
      * Create a new instance of {@link FusedLocationProviderClient} for use in a non-activity {@link Context}
@@ -232,6 +239,28 @@ public class LocationProvider {
     }
 
     /**
+     * Creates a callback for receiving location events.
+     *
+     * @param listener
+     * @return
+     * @since 0.1.0
+     */
+    public static synchronized LocationCallback createLocationCallback(
+            @NonNull OnLocationUpdatesListener listener
+    ) {
+        if (locationCallback == null) {
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult result) {
+                    super.onLocationResult(result);
+                    listener.onSuccess(result);
+                }
+            };
+        }
+        return locationCallback;
+    }
+
+    /**
      * Request location updates
      *
      * @param context
@@ -266,7 +295,7 @@ public class LocationProvider {
     }
 
     public interface OnLocationUpdatesListener {
-        void onSuccess(Location location);
+        void onSuccess(LocationResult result);
 
         void onFailure(Exception error);
     }

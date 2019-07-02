@@ -6,7 +6,9 @@ import android.location.Location;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 
@@ -50,6 +52,22 @@ public class LocationProviderTest {
     public void testShouldCreateLocationSettingRequest() {
         LocationSettingsRequest request = LocationProvider.createLocationSettingsRequest();
         assertNotNull("Should create location settings request", request);
+    }
+
+    @Test
+    public void testShouldCreateLocationCallback() {
+        LocationCallback callback = LocationProvider.createLocationCallback(new LocationProvider.OnLocationUpdatesListener() {
+            @Override
+            public void onSuccess(LocationResult result) {
+
+            }
+
+            @Override
+            public void onFailure(Exception error) {
+
+            }
+        });
+        assertNotNull("Should create location callback", callback);
     }
 
     @Test
