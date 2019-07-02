@@ -1,5 +1,6 @@
 package com.github.lykmapipo.location.ui;
 
+import android.annotation.SuppressLint;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         tvLatitude = findViewById(R.id.tvLatitude);
         Button btnRequestLastLocation = findViewById(R.id.btnRequestLastLocation);
         btnRequestLastLocation.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
             @Override
             public void onClick(View v) {
                 LocationProvider.requestLastLocation(getApplicationContext(), new LocationProvider.OnLastLocationListener() {
