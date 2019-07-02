@@ -1,6 +1,7 @@
 package com.github.lykmapipo.location;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 
@@ -174,17 +175,10 @@ public class LocationProvider {
 
     }
 
-    /**
-     * Get the last known location
-     *
-     * @param context
-     * @param listener
-     * @since 0.1.0
-     */
     @RequiresPermission(
             anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
     )
-    public static synchronized void requestLastLocation(
+    private static synchronized void requestLocation(
             @NonNull Context context,
             @NonNull OnLastLocationListener listener) {
         // obtain fused location client
@@ -205,6 +199,34 @@ public class LocationProvider {
                 else {
                     listener.onFailure(task.getException());
                 }
+            }
+        });
+    }
+
+    /**
+     * Get the last known location
+     *
+     * @param context
+     * @param listener
+     * @since 0.1.0
+     */
+    @RequiresPermission(
+            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+    )
+    public static synchronized void requestLastLocation(
+            @NonNull Context context,
+            @NonNull OnLastLocationListener listener) {
+        // check location settings
+        checkLocationSettings(context, new OnLocationSettingsChangeListener() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onSuccess(LocationSettingsResponse response) {
+                requestLocation(context, listener);
+            }
+
+            @Override
+            public void onFailure(Exception error) {
+                listener.onFailure(error);
             }
         });
     }
