@@ -104,16 +104,6 @@ public class LocationProvider {
     }
 
     /**
-     * Clear and reset internal states
-     *
-     * @since 0.1.0
-     */
-    public static synchronized void clear() {
-        settingsClient = null;
-        fusedLocationClient = null;
-    }
-
-    /**
      * Get the last known location
      *
      * @param context
@@ -164,6 +154,16 @@ public class LocationProvider {
 
     }
 
+    /**
+     * Clear and reset internal states
+     *
+     * @since 0.1.0
+     */
+    public static synchronized void clear() {
+        locationRequest = null;
+        settingsClient = null;
+        fusedLocationClient = null;
+    }
 
     public interface OnLastLocationListener {
         void onSuccess(Location location);
