@@ -7,12 +7,16 @@ import android.location.Location;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 /**
@@ -128,6 +132,49 @@ public class LocationProvider {
     }
 
     /**
+     * Check if the device has the necessary location settings.
+     *
+     * @param context
+     * @param listener
+     * @since 0.1.0
+     */
+    public static synchronized void checkLocationSettings(
+            @NonNull Context context,
+            @NonNull OnLocationSettingsChangeListener listener) {
+        // create client and request
+        LocationSettingsRequest request = createLocationSettingsRequest();
+        SettingsClient client = createSettingsClient(context);
+
+        // check location settings
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(request);
+
+        // handles success response
+        task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse response) {
+                listener.onSuccess(response);
+            }
+        });
+
+        // handle failure & request setting updates
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception failure) {
+                // TODO try resolve failure
+                if (failure instanceof ResolvableApiException) {
+                    listener.onFailure(failure);
+                }
+
+                // notify failure
+                else {
+                    listener.onFailure(failure);
+                }
+            }
+        });
+
+    }
+
+    /**
      * Get the last known location
      *
      * @param context
@@ -198,6 +245,12 @@ public class LocationProvider {
 
     public interface OnLocationUpdatesListener {
         void onSuccess(Location location);
+
+        void onFailure(Exception error);
+    }
+
+    public interface OnLocationSettingsChangeListener {
+        void onSuccess(LocationSettingsResponse response);
 
         void onFailure(Exception error);
     }

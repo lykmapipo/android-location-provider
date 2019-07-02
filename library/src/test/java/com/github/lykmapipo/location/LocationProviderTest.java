@@ -71,4 +71,5 @@ public class LocationProviderTest {
     public void cleanup() {
         LocationProvider.clear();
     }
+
 }
