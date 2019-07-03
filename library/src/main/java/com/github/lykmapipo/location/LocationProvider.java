@@ -310,6 +310,7 @@ public class LocationProvider {
         boolean shouldStop = fusedLocationClient != null && locationCallback != null;
         if (shouldStop) {
             fusedLocationClient.removeLocationUpdates(locationCallback);
+            // TODO execute returned tasks and update states
         }
     }
 

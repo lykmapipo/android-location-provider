@@ -45,5 +45,13 @@
             android:layout_marginTop="240dp"
             android:text="Request Location Updates" />
 
+        <Button
+            android:id="@+id/btnStopLocationUpdates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="300dp"
+            android:text="Stop Location Updates" />
+
     </RelativeLayout>
 </androidx.core.widget.NestedScrollView>
