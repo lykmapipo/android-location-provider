@@ -4,6 +4,7 @@ package com.github.lykmapipo.location;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
@@ -272,8 +273,30 @@ public class LocationProvider {
     )
     public static synchronized void requestLocationUpdates(
             @NonNull Context context,
-            @NonNull OnLastLocationListener listener) {
+            @NonNull OnLocationUpdatesListener listener) {
+        // check location settings
+        checkLocationSettings(context, new OnLocationSettingsChangeListener() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onSuccess(LocationSettingsResponse response) {
+                // obtain location updates callback
+                LocationCallback callback = createLocationCallback(listener);
 
+                // obtain fused location client
+                FusedLocationProviderClient fusedLocationClient = createLocationClient(context);
+
+                // obtain location request
+                LocationRequest request = createLocationRequest();
+
+                // start request location updates
+                fusedLocationClient.requestLocationUpdates(request, callback, Looper.myLooper());
+            }
+
+            @Override
+            public void onFailure(Exception error) {
+                listener.onFailure(error);
+            }
+        });
     }
 
     /**
@@ -282,6 +305,7 @@ public class LocationProvider {
      * @since 0.1.0
      */
     public static synchronized void clear() {
+        locationCallback = null;
         locationSettingsRequest = null;
         locationRequest = null;
         settingsClient = null;
