@@ -288,6 +288,8 @@ public class LocationProvider {
                 // obtain location request
                 LocationRequest request = createLocationRequest();
 
+                // TODO guard register multiple callback
+
                 // start request location updates
                 fusedLocationClient.requestLocationUpdates(request, callback, Looper.myLooper());
             }
@@ -297,6 +299,18 @@ public class LocationProvider {
                 listener.onFailure(error);
             }
         });
+    }
+
+    /**
+     * Stop location updates
+     *
+     * @since 0.1.0
+     */
+    public static void stopLocationUpdates() {
+        boolean shouldStop = fusedLocationClient != null && locationCallback != null;
+        if (shouldStop) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
     }
 
     /**
