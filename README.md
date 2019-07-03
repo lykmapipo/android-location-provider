@@ -1,5 +1,5 @@
-android-location-provider(WIP)
-==============================
+android-location-provider
+=========================
 
 [![](https://jitpack.io/v/lykmapipo/android-location-provider.svg)](https://jitpack.io/#lykmapipo/android-location-provider)
 
