@@ -37,5 +37,13 @@
             android:layout_marginTop="200dp"
             android:text="Latitude: 0.00" />
 
+        <Button
+            android:id="@+id/btnRequestLocationUpdates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="240dp"
+            android:text="Request Location Updates" />
+
     </RelativeLayout>
 </androidx.core.widget.NestedScrollView>
