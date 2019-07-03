@@ -33,7 +33,6 @@ dependencies {
     //androidx dependencies
     implementation "androidx.annotation:annotation:${ANDROIDX_ANNOTATION_VERSION}"
     implementation "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPACT_VERSION}"
-    implementation "com.github.florent37:inline-activity-result:${INLINE_ACTIVITY_RESULT_VERSION}"
 
     // location dependencies
     api "com.google.android.gms:play-services-location:${PLAY_SERVICES_LOCATION_VERSION}"
