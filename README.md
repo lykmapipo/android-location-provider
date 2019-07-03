@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvLongitude;
     private TextView tvLatitude;
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,54 +43,60 @@ public class MainActivity extends AppCompatActivity {
         tvLongitude = findViewById(R.id.tvLongitude);
         tvLatitude = findViewById(R.id.tvLatitude);
         Button btnRequestLastLocation = findViewById(R.id.btnRequestLastLocation);
-        btnRequestLastLocation.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("MissingPermission")
+        btnRequestLastLocation.setOnClickListener(v -> LocationProvider.requestLastLocation(this, new LocationProvider.OnLastLocationListener() {
             @Override
-            public void onClick(View v) {
-                LocationProvider.requestLastLocation(getApplicationContext(), new LocationProvider.OnLastLocationListener() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        Toast.makeText(MainActivity.this, "Location Success: " + location.toString(), Toast.LENGTH_SHORT).show();
-                        double longitude = location.getLongitude();
-                        double latitude = location.getLatitude();
-                        tvLatitude.setText(String.format(Locale.ENGLISH, "%s: %f", "Latitude", latitude));
-                        tvLongitude.setText(String.format(Locale.ENGLISH, "%s: %f", "Longitude", longitude));
-                    }
-
-                    @Override
-                    public void onFailure(Exception error) {
-                        Toast.makeText(MainActivity.this, "Location Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            public void onSuccess(Location location) {
+                Toast.makeText(MainActivity.this, "Location Success: " + location.toString(), Toast.LENGTH_SHORT).show();
+                double longitude = location.getLongitude();
+                double latitude = location.getLatitude();
+                tvLatitude.setText(format("Latitude", latitude));
+                tvLongitude.setText(format("Longitude", longitude));
             }
-        });
+
+            @Override
+            public void onFailure(Exception error) {
+                Toast.makeText(MainActivity.this, "Location Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }));
 
         // request location updates
         Button btnRequestLocationUpdates = findViewById(R.id.btnRequestLocationUpdates);
-        btnRequestLocationUpdates.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("MissingPermission")
+        btnRequestLocationUpdates.setOnClickListener(v -> LocationProvider.requestLocationUpdates(this, new LocationProvider.OnLocationUpdatesListener() {
             @Override
-            public void onClick(View v) {
-                LocationProvider.requestLocationUpdates(getApplicationContext(), new LocationProvider.OnLocationUpdatesListener() {
-                    @Override
-                    public void onSuccess(LocationResult result) {
-                        // obtain latest location
-                        Location location = result.getLastLocation();
+            public void onSuccess(LocationResult result) {
+                // obtain latest location
+                Location location = result.getLastLocation();
 
-                        Toast.makeText(MainActivity.this, "Location Updates Success: " + location.toString(), Toast.LENGTH_SHORT).show();
-                        double longitude = location.getLongitude();
-                        double latitude = location.getLatitude();
-                        tvLatitude.setText(String.format(Locale.ENGLISH, "%s: %f", "Latitude", latitude));
-                        tvLongitude.setText(String.format(Locale.ENGLISH, "%s: %f", "Longitude", longitude));
-                    }
-
-                    @Override
-                    public void onFailure(Exception error) {
-                        Toast.makeText(MainActivity.this, "Location Updates Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                Toast.makeText(MainActivity.this, "Location Updates Success: " + location.toString(), Toast.LENGTH_SHORT).show();
+                double longitude = location.getLongitude();
+                double latitude = location.getLatitude();
+                tvLatitude.setText(format("Latitude", latitude));
+                tvLongitude.setText(format("Longitude", longitude));
             }
+
+            @Override
+            public void onFailure(Exception error) {
+                Toast.makeText(MainActivity.this, "Location Updates Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }));
+
+        // stop location updates
+        Button btnStopLocationUpdates = findViewById(R.id.btnStopLocationUpdates);
+        btnStopLocationUpdates.setOnClickListener(view -> {
+            LocationProvider.stopLocationUpdates();
+            Toast.makeText(MainActivity.this, "Location Updates Stopped Successfully", Toast.LENGTH_SHORT).show();
+
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocationProvider.stopLocationUpdates();
+    }
+
+    private String format(@NonNull String label, @NonNull double value) {
+        return String.format(Locale.ENGLISH, "%s: %f", label, value);
     }
 }
 ```
