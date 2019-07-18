@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -211,6 +212,22 @@ public class LocationProvider {
                 }
             }
         });
+    }
+
+    /**
+     * Get the last known location
+     *
+     * @param fragment
+     * @param listener
+     * @since 0.1.0
+     */
+    @RequiresPermission(
+            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+    )
+    public static synchronized void requestLastLocation(
+            @NonNull Fragment fragment,
+            @NonNull OnLastLocationListener listener) {
+        requestLastLocation(fragment.getActivity(), listener);
     }
 
     /**
