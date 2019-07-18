@@ -31,8 +31,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     //androidx dependencies
-    implementation "androidx.annotation:annotation:${ANDROIDX_ANNOTATION_VERSION}"
-    implementation "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPACT_VERSION}"
+    api "androidx.annotation:annotation:${ANDROIDX_ANNOTATION_VERSION}"
+    api "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPACT_VERSION}"
 
     // location dependencies
     api "com.google.android.gms:play-services-location:${PLAY_SERVICES_LOCATION_VERSION}"
