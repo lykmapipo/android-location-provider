@@ -283,6 +283,23 @@ public class LocationProvider {
     /**
      * Request location updates
      *
+     * @param fragment
+     * @param listener
+     * @since 0.1.0
+     */
+    @RequiresPermission(
+            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+    )
+    public static synchronized void requestLocationUpdates(
+            @NonNull Fragment fragment,
+            @NonNull OnLocationUpdatesListener listener
+    ) {
+        requestLocationUpdates(fragment.getActivity(), listener);
+    }
+
+    /**
+     * Request location updates
+     *
      * @param context
      * @param listener
      * @since 0.1.0
