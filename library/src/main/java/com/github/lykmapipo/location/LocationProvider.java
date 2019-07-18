@@ -226,7 +226,8 @@ public class LocationProvider {
     )
     public static synchronized void requestLastLocation(
             @NonNull Fragment fragment,
-            @NonNull OnLastLocationListener listener) {
+            @NonNull OnLastLocationListener listener
+    ) {
         requestLastLocation(fragment.getActivity(), listener);
     }
 
@@ -242,7 +243,8 @@ public class LocationProvider {
     )
     public static synchronized void requestLastLocation(
             @NonNull Context context,
-            @NonNull OnLastLocationListener listener) {
+            @NonNull OnLastLocationListener listener
+    ) {
         // check location settings
         checkLocationSettings(context, new OnLocationSettingsChangeListener() {
             @SuppressLint("MissingPermission")
