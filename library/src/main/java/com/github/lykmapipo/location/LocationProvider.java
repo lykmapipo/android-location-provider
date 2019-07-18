@@ -149,7 +149,8 @@ public class LocationProvider {
      */
     public static synchronized void checkLocationSettings(
             @NonNull Context context,
-            @NonNull OnLocationSettingsChangeListener listener) {
+            @NonNull OnLocationSettingsChangeListener listener
+    ) {
         // create client and request
         LocationSettingsRequest request = createLocationSettingsRequest();
         SettingsClient client = createSettingsClient(context);
@@ -188,7 +189,8 @@ public class LocationProvider {
     )
     private static synchronized void requestLocation(
             @NonNull Context context,
-            @NonNull OnLastLocationListener listener) {
+            @NonNull OnLastLocationListener listener
+    ) {
         // obtain fused location client
         FusedLocationProviderClient fusedLocationClient = createLocationClient(context);
 
@@ -273,7 +275,8 @@ public class LocationProvider {
     )
     public static synchronized void requestLocationUpdates(
             @NonNull Context context,
-            @NonNull OnLocationUpdatesListener listener) {
+            @NonNull OnLocationUpdatesListener listener
+    ) {
         // check location settings
         checkLocationSettings(context, new OnLocationSettingsChangeListener() {
             @SuppressLint("MissingPermission")
