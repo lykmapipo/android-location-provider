@@ -2,6 +2,7 @@ package com.github.lykmapipo.location;
 
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
@@ -9,7 +10,11 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
+import com.github.florent37.inlineactivityresult.InlineActivityResult;
+import com.github.florent37.inlineactivityresult.request.Request;
+import com.github.florent37.inlineactivityresult.request.RequestFabric;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -163,6 +168,7 @@ public class LocationProvider {
         task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
             @Override
             public void onSuccess(LocationSettingsResponse response) {
+                // notify success
                 listener.onSuccess(response);
             }
         });
@@ -171,15 +177,8 @@ public class LocationProvider {
         task.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception failure) {
-                // TODO try resolve failure
-                if (failure instanceof ResolvableApiException) {
-                    listener.onFailure(failure);
-                }
-
                 // notify failure
-                else {
-                    listener.onFailure(failure);
-                }
+                listener.onFailure(failure);
             }
         });
 
@@ -228,7 +227,7 @@ public class LocationProvider {
             @NonNull Fragment fragment,
             @NonNull OnLastLocationListener listener
     ) {
-        requestLastLocation(fragment.getActivity(), listener);
+        requestLastLocation(fragment.requireActivity(), listener);
     }
 
     /**
@@ -253,9 +252,31 @@ public class LocationProvider {
                 requestLocation(context, listener);
             }
 
+            @SuppressLint("MissingPermission")
             @Override
             public void onFailure(Exception error) {
-                listener.onFailure(error);
+                // try resolve error
+                if (error instanceof ResolvableApiException) {
+                    // do resolve
+                    try {
+                        ResolvableApiException resolvable = (ResolvableApiException) error;
+                        PendingIntent resolution = resolvable.getResolution();
+                        Request request = RequestFabric.create(resolution.getIntentSender(), null, 0, 0, 0, null);
+
+                        new InlineActivityResult((FragmentActivity) context)
+                                .startForResult(request)
+                                .onSuccess(result -> requestLocation(context, listener))
+                                .onFail(result -> onFailure(error));
+                    }
+                    // notify resolve error
+                    catch (Exception resolveError) {
+                        listener.onFailure(resolveError);
+                    }
+                }
+                // notify error
+                else {
+                    listener.onFailure(error);
+                }
             }
         });
     }
@@ -296,7 +317,7 @@ public class LocationProvider {
             @NonNull Fragment fragment,
             @NonNull OnLocationUpdatesListener listener
     ) {
-        requestLocationUpdates(fragment.getActivity(), listener);
+        requestLocationUpdates(fragment.requireActivity(), listener);
     }
 
     /**
@@ -335,6 +356,7 @@ public class LocationProvider {
 
             @Override
             public void onFailure(Exception error) {
+                // TODO: try resolve failure
                 listener.onFailure(error);
             }
         });
