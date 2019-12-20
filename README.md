@@ -18,7 +18,7 @@ add `android-location-provider` dependency into your project
 
 ```gradle
 dependencies {
-    implementtation 'com.github.lykmapipo:android-location-provider:v0.2.0'
+    implementtation 'com.github.lykmapipo:android-location-provider:v0.3.0'
 }
 ```
 
