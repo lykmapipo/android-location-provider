@@ -265,7 +265,7 @@ public class LocationProvider {
 
                         new InlineActivityResult((FragmentActivity) context)
                                 .startForResult(request)
-                                .onSuccess(result -> requestLocation(context, listener))
+                                .onSuccess(result -> requestLastLocation(context, listener))
                                 .onFail(result -> onFailure(error));
                     }
                     // notify resolve error
@@ -354,10 +354,31 @@ public class LocationProvider {
                 fusedLocationClient.requestLocationUpdates(request, callback, Looper.myLooper());
             }
 
+            @SuppressLint("MissingPermission")
             @Override
             public void onFailure(Exception error) {
-                // TODO: try resolve failure
-                listener.onFailure(error);
+                // try resolve error
+                if (error instanceof ResolvableApiException) {
+                    // do resolve
+                    try {
+                        ResolvableApiException resolvable = (ResolvableApiException) error;
+                        PendingIntent resolution = resolvable.getResolution();
+                        Request request = RequestFabric.create(resolution.getIntentSender(), null, 0, 0, 0, null);
+
+                        new InlineActivityResult((FragmentActivity) context)
+                                .startForResult(request)
+                                .onSuccess(result -> requestLocationUpdates(context, listener))
+                                .onFail(result -> onFailure(error));
+                    }
+                    // notify resolve error
+                    catch (Exception resolveError) {
+                        listener.onFailure(resolveError);
+                    }
+                }
+                // notify error
+                else {
+                    listener.onFailure(error);
+                }
             }
         });
     }
