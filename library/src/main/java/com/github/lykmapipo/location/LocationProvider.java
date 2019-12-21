@@ -4,11 +4,16 @@ package com.github.lykmapipo.location;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Looper;
+import android.os.Process;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -25,9 +30,11 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
  * A pack of helpful helpers to obtain location(s) from fused {@link com.google.android.gms.location.FusedLocationProviderClient}.
@@ -150,12 +157,11 @@ public class LocationProvider {
      * Check if the device has the necessary location settings.
      *
      * @param context
-     * @param listener
-     * @since 0.1.0
+     * @since 0.4.0
      */
-    public static synchronized void checkLocationSettings(
-            @NonNull Context context,
-            @NonNull OnLocationSettingsChangeListener listener
+    @VisibleForTesting
+    public static synchronized Task<LocationSettingsResponse> checkLocationSettings(
+            @NonNull Context context
     ) {
         // create client and request
         LocationSettingsRequest request = createLocationSettingsRequest();
@@ -164,38 +170,77 @@ public class LocationProvider {
         // check location settings
         Task<LocationSettingsResponse> task = client.checkLocationSettings(request);
 
-        // handles success response
-        task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse response) {
-                // notify success
-                listener.onSuccess(response);
-            }
-        });
-
-        // handle failure & request setting updates
-        task.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception failure) {
-                // notify failure
-                listener.onFailure(failure);
-            }
-        });
-
+        // return
+        return task;
     }
 
-    @RequiresPermission(
-            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
-    )
-    private static synchronized void requestLocation(
+    /**
+     * Check if the device has the necessary location settings.
+     *
+     * @param context
+     * @param listener
+     * @since 0.1.0
+     */
+    public static synchronized void checkLocationSettings(
             @NonNull Context context,
-            @NonNull OnLastLocationListener listener
+            @NonNull OnLocationSettingsChangeListener listener
     ) {
+        // check location settings
+        Task<LocationSettingsResponse> task = checkLocationSettings(context);
+
+        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                // handle success
+                if (task.isSuccessful()) {
+                    listener.onSuccess(task.getResult());
+                }
+                // handle failure
+                else {
+                    listener.onFailure(task.getException());
+                }
+            }
+        });
+    }
+
+    /**
+     * Request last known location
+     *
+     * @param context {@link Context}
+     * @return {@link Task} which resolve with {@link Location} or {@link Exception}
+     * @since 0.4.0
+     */
+    @VisibleForTesting
+    @RequiresPermission(
+            anyOf = {
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.ACCESS_FINE_LOCATION"
+            }
+    )
+    public static synchronized Task<Location> requestLocation(@NonNull Context context) {
         // obtain fused location client
         FusedLocationProviderClient fusedLocationClient = createLocationClient(context);
 
         // request last known location
         Task<Location> lastLocation = fusedLocationClient.getLastLocation();
+
+        // return
+        return lastLocation;
+    }
+
+    @VisibleForTesting
+    @RequiresPermission(
+            anyOf = {
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.ACCESS_FINE_LOCATION"
+            }
+    )
+    public static synchronized void requestLocation(
+            @NonNull Context context,
+            @NonNull OnLastLocationListener listener
+    ) {
+        // request last known location
+        Task<Location> lastLocation = requestLocation(context);
         lastLocation.addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
@@ -221,8 +266,12 @@ public class LocationProvider {
      * @since 0.1.0
      */
     @RequiresPermission(
-            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+            anyOf = {
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.ACCESS_FINE_LOCATION"
+            }
     )
+    @MainThread
     public static synchronized void requestLastLocation(
             @NonNull Fragment fragment,
             @NonNull OnLastLocationListener listener
@@ -238,8 +287,12 @@ public class LocationProvider {
      * @since 0.1.0
      */
     @RequiresPermission(
-            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+            anyOf = {
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.ACCESS_FINE_LOCATION"
+            }
     )
+    @MainThread
     public static synchronized void requestLastLocation(
             @NonNull Context context,
             @NonNull OnLastLocationListener listener
@@ -261,7 +314,10 @@ public class LocationProvider {
                     try {
                         ResolvableApiException resolvable = (ResolvableApiException) error;
                         PendingIntent resolution = resolvable.getResolution();
-                        Request request = RequestFabric.create(resolution.getIntentSender(), null, 0, 0, 0, null);
+                        Request request = RequestFabric.create(
+                                resolution.getIntentSender(), null,
+                                0, 0, 0, null
+                        );
 
                         new InlineActivityResult((FragmentActivity) context)
                                 .startForResult(request)
@@ -311,8 +367,12 @@ public class LocationProvider {
      * @since 0.1.0
      */
     @RequiresPermission(
-            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+            anyOf = {
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.ACCESS_FINE_LOCATION"
+            }
     )
+    @MainThread
     public static synchronized void requestLocationUpdates(
             @NonNull Fragment fragment,
             @NonNull OnLocationUpdatesListener listener
@@ -328,8 +388,12 @@ public class LocationProvider {
      * @since 0.1.0
      */
     @RequiresPermission(
-            anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}
+            anyOf = {
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.ACCESS_FINE_LOCATION"
+            }
     )
+    @MainThread
     public static synchronized void requestLocationUpdates(
             @NonNull Context context,
             @NonNull OnLocationUpdatesListener listener
@@ -363,7 +427,10 @@ public class LocationProvider {
                     try {
                         ResolvableApiException resolvable = (ResolvableApiException) error;
                         PendingIntent resolution = resolvable.getResolution();
-                        Request request = RequestFabric.create(resolution.getIntentSender(), null, 0, 0, 0, null);
+                        Request request = RequestFabric.create(
+                                resolution.getIntentSender(), null, 0,
+                                0, 0, null
+                        );
 
                         new InlineActivityResult((FragmentActivity) context)
                                 .startForResult(request)
@@ -381,6 +448,80 @@ public class LocationProvider {
                 }
             }
         });
+    }
+
+    /**
+     * Request location address
+     *
+     * @param context
+     * @param location
+     * @param listener
+     * @since 0.1.0
+     */
+    @RequiresPermission("android.permission.INTERNET")
+    public static synchronized void requestAddress(
+            @NonNull Context context,
+            @NonNull Location location,
+            @NonNull OnAddressListener listener
+    ) {
+        // invoke task
+        Task<Address> task = getAddressFromLocation(context, location);
+        task.addOnCompleteListener(new OnCompleteListener<Address>() {
+            @Override
+            public void onComplete(@NonNull Task<Address> task) {
+                // handle success
+                if (task.isSuccessful()) {
+                    listener.onSuccess(task.getResult());
+                }
+                // handle failure
+                else {
+                    listener.onFailure(task.getException());
+                }
+            }
+        });
+    }
+
+    /**
+     * Derive address from a given location
+     *
+     * @param context
+     * @param location
+     * @return
+     */
+    public static synchronized Task<Address> getAddressFromLocation(
+            @NonNull Context context, @NonNull Location location
+    ) {
+        final TaskCompletionSource<Address> source = new TaskCompletionSource<Address>();
+        Thread fetch = new Thread(() -> {
+            // request address
+            try {
+
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
+                if (!Geocoder.isPresent()) {
+                    throw new Exception("Geocoder Not Present");
+                }
+                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        1
+                );
+                if (addresses == null || addresses.isEmpty()) {
+                    throw new Exception("Address Not Found");
+                }
+                Address address = addresses.get(0);
+                source.setResult(address);
+            }
+            // notify error
+            catch (Exception error) {
+                source.setException(error);
+            }
+        });
+        fetch.start();
+
+        // return task
+        return source.getTask();
     }
 
     /**
@@ -407,6 +548,12 @@ public class LocationProvider {
         locationRequest = null;
         settingsClient = null;
         fusedLocationClient = null;
+    }
+
+    public interface OnAddressListener {
+        void onSuccess(Address address);
+
+        void onFailure(Exception error);
     }
 
     public interface OnLastLocationListener {

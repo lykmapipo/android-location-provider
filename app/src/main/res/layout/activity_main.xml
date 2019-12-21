@@ -23,26 +23,41 @@
             android:layout_marginTop="100dp"
             android:text="Request Last Location" />
 
+        <Button
+            android:id="@+id/btnRequestAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="150dp"
+            android:text="Request Address" />
+
         <TextView
             android:id="@+id/tvLongitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="160dp"
+            android:layout_marginTop="210dp"
             android:text="Longitude: 0.00" />
 
         <TextView
             android:id="@+id/tvLatitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="230dp"
             android:text="Latitude: 0.00" />
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="250dp"
+            android:text="Address: Dar es Salaam" />
 
         <Button
             android:id="@+id/btnRequestLocationUpdates"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="240dp"
+            android:layout_marginTop="270dp"
             android:text="Request Location Updates" />
 
         <Button
@@ -50,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="300dp"
+            android:layout_marginTop="320dp"
             android:text="Stop Location Updates" />
 
     </RelativeLayout>
