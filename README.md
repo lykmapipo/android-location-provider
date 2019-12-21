@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private TextView tvLongitude;
     private TextView tvLatitude;
+    private TextView tvAddress;
+    private Location lastKnownLocation;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -42,11 +44,13 @@ public class MainActivity extends AppCompatActivity {
         // request last known location
         tvLongitude = findViewById(R.id.tvLongitude);
         tvLatitude = findViewById(R.id.tvLatitude);
+        tvAddress = findViewById(R.id.tvAddress);
         Button btnRequestLastLocation = findViewById(R.id.btnRequestLastLocation);
         btnRequestLastLocation.setOnClickListener(v -> LocationProvider.requestLastLocation(this, new LocationProvider.OnLastLocationListener() {
             @Override
             public void onSuccess(Location location) {
                 Toast.makeText(MainActivity.this, "Location Success: " + location.toString(), Toast.LENGTH_SHORT).show();
+                lastKnownLocation = location;
                 double longitude = location.getLongitude();
                 double latitude = location.getLatitude();
                 tvLatitude.setText(format("Latitude", latitude));
@@ -58,6 +62,26 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Location Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }));
+
+        // request address
+        Button btnRequestAddress = findViewById(R.id.btnRequestAddress);
+        btnRequestAddress.setOnClickListener(v -> {
+            if (lastKnownLocation != null) {
+                LocationProvider.requestAddress(this, lastKnownLocation, new LocationProvider.OnAddressListener() {
+
+                    @Override
+                    public void onSuccess(Address address) {
+                        Toast.makeText(MainActivity.this, "Address Success: " + address.toString(), Toast.LENGTH_SHORT).show();
+                        tvAddress.setText(format("Address", address.getAdminArea(), address.getCountryName()));
+                    }
+
+                    @Override
+                    public void onFailure(Exception error) {
+                        Toast.makeText(MainActivity.this, "Address Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
 
         // request location updates
         Button btnRequestLocationUpdates = findViewById(R.id.btnRequestLocationUpdates);
@@ -97,6 +121,11 @@ public class MainActivity extends AppCompatActivity {
 
     private String format(@NonNull String label, @NonNull double value) {
         return String.format(Locale.ENGLISH, "%s: %f", label, value);
+    }
+
+    private String format(@NonNull String label, @NonNull String... value) {
+        String s = TextUtils.join(", ", value);
+        return String.format(Locale.ENGLISH, "%s: %s", label, s);
     }
 }
 ```
